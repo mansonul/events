@@ -56,6 +56,7 @@ LOCAL_APPS = [
     # custom users app
     'project.users.apps.UsersConfig',
     # Your stuff: custom apps go here
+    'events',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
