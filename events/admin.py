@@ -1,8 +1,7 @@
 from django.contrib import admin
-
-
 # Register your models here.
 from .models import Event
+
 
 # The Admin view for the Events App
 class EventAdmin(admin.ModelAdmin):
@@ -12,5 +11,6 @@ class EventAdmin(admin.ModelAdmin):
     list_display = (
         'title',
         'description',)
+
 
 admin.site.register(Event, EventAdmin)
