@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>This is the events list</h2>
+
+    {% for event in events %}
+    
+        {% if user == event.user %}
+            <h3>{{ event.title }}</h3>
+            {% if event.image %}
+                <img src="{{event.image.url}}" class="img-responsive" style="height: 250px;">
+                <br>
+            {% endif %}
+            {% if event.description %}
+                {{ event.description|safe }}
+            {% endif %}
+            <a href="{% url 'events:update' slug=event.slug %}" type="button" class="btn btn-info">Edit</a>
+            <a href="{% url 'events:delete' slug=event.slug %}">Delete {{ event.title }}</a>
+        {% endif %}
+
+    {% endfor %}
+{% endblock content %}
