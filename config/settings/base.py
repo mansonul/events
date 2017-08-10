@@ -49,7 +49,9 @@ THIRD_PARTY_APPS = [
     'allauth',  # registration
     'allauth.account',  # registration
     'allauth.socialaccount',  # registration
-    'ckeditor'  # ckeditor
+    'ckeditor',  # ckeditor
+    'imagekit',  # Image
+    'autoslug',  # Slug creator
 ]
 
 # Apps specific for this project go here.

@@ -7,10 +7,13 @@ from .models import Event
 class EventAdmin(admin.ModelAdmin):
     fields = (
         'title',
-        'description',)
+        'image',
+        'description',
+        'user',)
     list_display = (
         'title',
-        'description',)
+        'description',
+        'user')
 
 
 admin.site.register(Event, EventAdmin)
