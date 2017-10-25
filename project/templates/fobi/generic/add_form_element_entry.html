@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{# {% extends fobi_theme.base_edit_template %} #}
+
+{% load i18n %}
+
+{% block page-title %}
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <h3 style="font-weight: 600; color:#f26418;">Create Event</h3>
+    </div>
+    <div class="col-md-6">
+        <div class="stepwizard">
+            <div class="stepwizard-row">
+                <div class="stepwizard-step">
+                    <div class="btn btn-done btn-circle">
+                        <span><i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                    <p style="font-weight: 800; color:#25b75d;">Details</p>
+                </div>
+                <div class="stepwizard-step">
+                    <div class="btn btn-done btn-circle">
+                        <span><i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                    <p style="font-weight: 800; color:#25b75d;">Locations</p>
+                </div>
+                <div class="stepwizard-step">
+                    <div class="btn btn-active btn-circle">
+                        <span>3</span>
+                    </div>
+                    <p style="font-weight: 800; color:#7ca6af; text-decoration:underline;">Collections</p>
+                </div>
+                <div class="stepwizard-step">
+                    <div class="btn btn-circle">
+                        <span>4</span>
+                    </div>
+                    <p style="font-weight: 800; color:#f26418;">Invite</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% blocktrans with form_element_plugin.name as plugin_name %}Add "{{ plugin_name }}" element to the forms{% endblocktrans %}{% endblock page-title %}
+
+
+{% block content %}
+
+    {% include fobi_theme.add_form_element_entry_ajax_template %}
+
+{% endblock content %}

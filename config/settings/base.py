@@ -44,6 +44,7 @@ DJANGO_APPS = [
     # Admin
     'django.contrib.admin',
 ]
+
 THIRD_PARTY_APPS = [
     'crispy_forms',  # Form layouts
     'allauth',  # registration
@@ -52,6 +53,11 @@ THIRD_PARTY_APPS = [
     'ckeditor',  # ckeditor
     'imagekit',  # Image
     'autoslug',  # Slug creator
+    'easy_maps',  # Maps
+    'leaflet',  # Another Map
+    'extra_views',  # views
+    # 'django_hosts',  # For subdomains
+    'import_export',  # For import and export
 ]
 
 # Apps specific for this project go here.
@@ -60,6 +66,13 @@ LOCAL_APPS = [
     'project.users.apps.UsersConfig',
     # Your stuff: custom apps go here
     'events',
+    'events.contrib.themes.bootstrap3',  # Bootstrap 3 theme
+    # `django-fobi` form handlers
+    'events.contrib.plugins.form_handlers.mail',
+    'events.contrib.plugins.form_handlers.db_store',
+    # `django-fobi` form elements - fields
+    'events.contrib.plugins.form_elements.fields.checkbox_select_multiple',
+    'events.contrib.plugins.form_elements.fields.radio',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -68,6 +81,9 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # MIDDLEWARE CONFIGURATION
 # ------------------------------------------------------------------------------
 MIDDLEWARE = [
+    # Hosts
+    'django_hosts.middleware.HostsRequestMiddleware',
+    # End Hosts
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -75,6 +91,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # Hosts
+    'django_hosts.middleware.HostsResponseMiddleware',
+    # End Hosts
 ]
 
 # MIGRATIONS CONFIGURATION
@@ -87,6 +107,7 @@ MIGRATION_MODULES = {
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = env.bool('DJANGO_DEBUG', False)
+# DEBUG = False
 
 # FIXTURE CONFIGURATION
 # ------------------------------------------------------------------------------
@@ -172,6 +193,7 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 # Your stuff: custom template context processors go here
+                'events.context_processors.theme',
             ],
         },
     },
@@ -210,6 +232,14 @@ MEDIA_URL = '/media/'
 # URL Configuration
 # ------------------------------------------------------------------------------
 ROOT_URLCONF = 'config.urls'
+
+ROOT_HOSTCONF = 'config.hosts'
+DEFAULT_HOST = 'www'
+PARENT_HOST = 'aplicat.ie:8000'
+
+
+ALLOWED_HOSTS = ['.aplicat.ie', 'localhost']
+DEFAULT_REDIRECT_PATH = 'http://aplicat.ie:8000'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = 'config.wsgi.application'
@@ -255,8 +285,10 @@ AUTHENTICATION_BACKENDS = [
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-
-ACCOUNT_ALLOW_REGISTRATION = env.bool('DJANGO_ACCOUNT_ALLOW_REGISTRATION', True)
+ACCOUNT_SIGNUP_FORM_CLASS = 'users.forms.SignupForm'
+ACCOUNT_ALLOW_REGISTRATION = env.bool(
+    'DJANGO_ACCOUNT_ALLOW_REGISTRATION',
+    True)
 ACCOUNT_ADAPTER = 'project.users.adapters.AccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'project.users.adapters.SocialAccountAdapter'
 
@@ -289,12 +321,23 @@ ADMIN_URL = r'^admin/'
 # ------------------------------------------------------------------------------
 CKEDITOR_CONFIGS = {
     'default': {
+        'skin': 'dragos',
         'toolbar': 'Custom',
         'toolbar_Custom': [
             ['Bold', 'Italic', 'Underline'],
             ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
             ['Link', 'Unlink'],
-            ['RemoveFormat', 'Source']
-        ]
+            ['RemoveFormat']
+        ],
+        'width': '100%',
     }
+}
+
+EASY_MAPS_GOOGLE_MAPS_API_KEY = ' AIzaSyByvIhe5x2uDsVamvHl5D0pd-eMAg0mACE'
+
+DEFAULT_EVENT_VALUES = {
+    'event': 1,
+    'location': 1,
+    'collection': 3,
+    'email': 50
 }

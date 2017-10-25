@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% load i18n fobi_tags %}
+
+{% block content %}
+
+<form action="" method="post">
+  {% csrf_token %}
+  {{form.as_p}}
+  <input type="submit" class="btn-sim btn" value="Next Step" />
+</form>
+<div class="panel-body">
+  <ul class="nav">
+    <li class="dropdown">
+      <a class="dropdown-toggle" data-toggle="dropdown" href="javascript:;">
+        Select Type <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+      {% for group, plugins in user_form_element_plugins.items %}
+        {% if not forloop.first %}
+        <li class="divider"></li>
+        {% endif %}
+        <li class="dropdown-header">{{ group }}</li>
+        {% for form_element_uid, form_element_name in plugins %}
+<li><a href="{# url 'fobi.add_form_element_entry' form_entry.pk form_element_uid #}">{{ form_element_name }}</a></li>
+        {% endfor %}
+      {% endfor %}
+      </ul>
+    </li>
+  </ul>
+  <form method="post" action="{{ request.path }}?active_tab=tab-form-elements" novalidate="novalidate" class="{% block form_elements_html_class %}form-horizontal{% endblock %}">
+    {% csrf_token %}
+    {% with assembled_form as form %}
+      {# {% include fobi_theme.form_edit_snippet_template_name %} #}
+    {% endwith %}
+
+    {{ form_element_entry_formset.management_form }}
+
+    {% comment %}
+    {% with form_element_entry_formset as form %}
+      {% include fobi_theme.form_edit_snippet_template_name %}
+    {% endwith %}
+    {% endcomment %}
+
+    <!--<div class="{% block form_elements_button_outer_wrapper_html_class %}control-group{% endblock %}">
+      <div class="{% block form_elements_button_wrapper_html_class %}controls{% endblock %}">
+        <input type="submit" name="ordering" class="{% block form_elements_button_html_class %}btn btn-primary pull-right{% endblock %}" value="{% trans 'Save ordering' %}"/>
+      </div>
+    </div>-->
+  </form>
+
+</div>
+{% endblock content %}

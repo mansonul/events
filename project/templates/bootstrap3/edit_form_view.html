@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% load i18n fobi_tags %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <h3 style="font-weight: 600; color:#f26418;">Create Event</h3>
+    </div>
+    <div class="col-md-6">
+        <div class="stepwizard">
+            <div class="stepwizard-row">
+                <div class="stepwizard-step">
+                    <div class="btn btn-done btn-circle">
+                        <span><i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                    <p style="font-weight: 800; color:#25b75d;">Details</p>
+                </div>
+                <div class="stepwizard-step">
+                    <div class="btn btn-done btn-circle">
+                        <span><i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                    <p style="font-weight: 800; color:#25b75d;">Locations</p>
+                </div>
+                <div class="stepwizard-step">
+                    <div class="btn btn-active btn-circle">
+                        <span>3</span>
+                    </div>
+                    <p style="font-weight: 800; color:#7ca6af; text-decoration:underline;">Collections</p>
+                </div>
+                <div class="stepwizard-step">
+                    <div class="btn btn-circle">
+                        <span>4</span>
+                    </div>
+                    <p style="font-weight: 800; color:#f26418;">Invite</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        {% if form_elements.count < event_location_quota %}
+            <p>To add a list to your event please first select a list type</p>
+            <div class="col-md-9">
+                <div class="row">
+                    <div class="col-md-2 label col-form-label">List Type: </div>
+                    
+                    <div class="dropdown show">
+                        <a class="btn btn-form dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Select Type
+                        </a>
+
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            {% for group, plugins in user_form_element_plugins.items %}
+                                {% for form_element_uid, form_element_name in plugins %}
+                                    <a class="dropdown-item" href="{% url 'events:fobi.add_form_element_entry' form_entry.pk form_element_uid %}">{{ form_element_name }}</a>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <span class="info">
+                        <i class="fa fa-info-circle fa-lg" aria-hidden="true" data-toggle="tooltip" data-placement="right"></i>
+                    </span>
+                </div>
+            </div>
+        {% endif %}
+        <hr>
+        <div class="row">
+            <div class="col-md-12">
+                <form method="post" action="" novalidate="novalidate" class="{% block form_elements_html_class %}form-horizontal{% endblock %}">
+                {% csrf_token %}
+                    {% with assembled_form as form %}
+                        {% include fobi_theme.form_edit_snippet_template_name %}
+                    {% endwith %}
+
+                {{ form_element_entry_formset.management_form }}
+
+                </form>
+            </div>
+        </div>
+        <hr>
+        {% for form_handler_uid, form_handler_name in user_form_handler_plugins %}
+            {% if forloop.first %}
+                {% if form_handler_uid == 'db_store' %}
+                    <a href="{% url 'events:fobi.add_form_handler_entry' form_entry.pk form_handler_uid %}" type="button">aici</a>
+                {% else %}
+                    <a href="{% url 'events:email-create' pk=form_entry.pk %}">Add e-mails</a>
+                {%endif%}
+            {%endif%}
+        {% endfor %}
+    </div>
+</div>
+
+<div class="tooltip bs-tooltip-top" role="tooltip">
+    <div class="arrow"></div>
+    <div class="tooltip-inner">
+        Some tooltip text!
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+  $('[data-toggle="tooltip"]').tooltip(
+  {
+    title: "* Plain list will just display your list<br>" +
+           "* Single choice list will display your list with radio buttons " +
+           "(ability to select only one element per invitee)<br>" +
+           "* Multiple choice list will display your list with checkboxes " +
+           "(ability to select as many elements as needed per invitee)<br>" +
+           "* To add another list select a list type again",
+    html: true,
+    // template:
+  })
+})
+</script>
+
+{% endblock content %}

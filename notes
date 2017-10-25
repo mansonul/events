@@ -1,0 +1,13 @@
+defaults : {
+    events : 1,
+    locations : 1,
+    collections: 3,
+    emails: 50
+}
+
+preturi : {
+    emails : 5 euro + 10 emails,
+    collections : + 1,
+    locations : + 1,
+    events : + 1 (care ia caracteristicile de default)
+}

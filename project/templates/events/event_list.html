@@ -1,22 +1,71 @@
 {% extends "base.html" %}
-
+{% load easy_maps_tags math static %}
+{# {% load hosts %} #}
 {% block content %}
-    <h2>This is the events list</h2>
-
-    {% for event in events %}
-    
-        {% if user == event.user %}
-            <h3>{{ event.title }}</h3>
-            {% if event.image %}
-                <img src="{{event.image.url}}" class="img-responsive" style="height: 250px;">
-                <br>
-            {% endif %}
-            {% if event.description %}
-                {{ event.description|safe }}
-            {% endif %}
-            <a href="{% url 'events:update' slug=event.slug %}" type="button" class="btn btn-info">Edit</a>
-            <a href="{% url 'events:delete' slug=event.slug %}">Delete {{ event.title }}</a>
+    {% if events.count == 0 %}
+        <h3 style="font-weight: 600;">Events</h3>
+        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa.<br>
+        Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+        <a href="{# url 'events:create' #}" type="button" class="btn btn-sim">Create New Event</a>
+    {% else %}
+        <div class="row" id="event">
+            <div class="col-md-12">
+                <h3 style="font-weight: 600; color:#f26418;">Events</h3>
+                <table class="table table-hover" id="myTable">
+                  <thead>
+                    <tr>
+                      <th>EVENT TITLE</th>
+                      <th>EVENT CREATION DATE</th>
+                      <th>OPTIONS</th>
+                      <th>ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {% for event in events %}
+                    <tr>
+                      <th scope="row"><a href="{% url 'events:detail' pk=event.pk %}" style="color: #000;">{{ event.title }}</a></th>
+                      <td>{{event.date_created}}</td>
+                      <td>
+                        <span >
+                          <a data-fancybox data-type="iframe" data-src="{# url 'invitati' pk=event.pk #}" href="javascript:;"><i class="color-actions fa fa-eye" aria-hidden="true"></i> Preview</a>
+                        </span>
+                      <span class="color-actions"><i class="color-actions fa fa-area-chart" aria-hidden="true" style="margin-left:10px;"></i> Statistics</span>
+                      </td>
+                      <td>
+                        <a href="{% url 'events:update' pk=event.pk %}" style="color: #000;">
+                          <i class="color-actions fa fa-pencil" aria-hidden="true"></i>
+                        </a>
+                        <a href="{% url 'events:delete' pk=event.pk %}" class="color-actions">
+                          <i class="fa fa-trash" aria-hidden="true" style="margin-left:10px;"></i>
+                        </a>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>              
+            </div>
+        </div>
+        {% if events.count < quota %}
+            <hr>
+            <a href="{% url 'events:create' %}" type="button" class="btn btn-sim">Create an Event!</a>
+            <hr>
         {% endif %}
+    {% endif %}
+    <!--<script src="{% static 'js/sorttable.js' %}"></script>-->
 
-    {% endfor %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.25/jquery.fancybox.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.25/jquery.fancybox.min.js"></script>
+
+
+
+<script type="text/javascript">
+  
+$('#myTable').DataTable( {
+    // scrollY: 100,
+    paging: false
+} );
+
+</script>
+    
 {% endblock content %}

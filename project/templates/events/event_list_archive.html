@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% for event in events %}
+    
+        {% if user == event.user %}
+            <h3>{{ event.title }}</h3>
+            {% if event.image %}
+                <img src="{{event.image.url}}" class="img-responsive" style="height: 250px;">
+                <br>
+            {% endif %}
+            {% if event.description %}
+                {{ event.description|safe }}
+            {% endif %}
+            <!-- <a href="{% url 'events:update' slug=event.slug %}" type="button" class="btn btn-info">Edit</a>-->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="edit">Edit</button>
+            <a href="{% url 'events:delete' slug=event.slug %}">Delete {{ event.title }}</a>
+            <!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="delete">Delete {{ event.title }}</button>-->
+        {% endif %}
+
+    {% endfor %}
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Update the event</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="post" enctype="multipart/form-data" id="event-form-update" action='{# url "events:list" #}' data-url='{% url "events:list" %}'>
+        {% csrf_token %}
+            {{ form.media }}
+            {{ form.as_p|safe }}
+            <input type="submit" class="btn btn-primary" value="Save changes" />
+        </form>
+
+            <div id="test">
+            </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+    
+    $('#exampleModal').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget) // Button that triggered the modal
+      var recipient = button.data('whatever') // Extract info from data-* attributes
+      // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+
+
+      // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+      var modal = $(this)
+      modal.find('.modal-title').text('New message to ' + recipient)
+      modal.find('.modal-body input').val(recipient)
+    })
+
+    $(document).ready(function(){
+    var $myForm = $('#event-form-update')
+    $myForm.addClass('inactive')
+    $myForm.submit(function(event){
+        event.preventDefault()
+        var $formData = $(this).serialize()
+        var $thisURL = $myForm.attr('data-url')
+        $.ajax({
+            method: "POST",
+            url: '/update/o/',
+            data: $formData,
+            success: handleFormSuccess,
+            error: handleFormError,
+        })
+    })
+
+    function handleFormSuccess(response){
+        console.log(response)
+        $('#test').append('<h4>Title: '+response.title+'</h4>'+response.description)
+        // $('#test').html(response);
+    }
+
+    function handleFormError(jqXHR, textStatus, errorThrown){
+        console.log(jqXHR)
+        console.log(textStatus)
+        console.log(errorThrown)
+    }
+})
+
+</script>
+{% endblock content %}

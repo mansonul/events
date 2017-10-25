@@ -1,3 +1,7 @@
+# Dragos
+from django.conf import settings
+# end Dragos
+
 from django.contrib.auth.models import AbstractUser
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -11,6 +15,14 @@ class User(AbstractUser):
     # First Name and Last Name do not cover name patterns
     # around the globe.
     name = models.CharField(_('Name of User'), blank=True, max_length=255)
+    event_value = models.IntegerField(
+        default=settings.DEFAULT_EVENT_VALUES['event'])
+    location_value = models.IntegerField(
+        default=settings.DEFAULT_EVENT_VALUES['location'])
+    collection_value = models.IntegerField(
+        default=settings.DEFAULT_EVENT_VALUES['collection'])
+    email_value = models.IntegerField(
+        default=settings.DEFAULT_EVENT_VALUES['email'])
 
     def __str__(self):
         return self.username

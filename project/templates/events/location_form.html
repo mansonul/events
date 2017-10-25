@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags static %}
+
+{% block content %}
+{% if locations.count >= 3 %}
+    <h1>Please upgrade account</h1>
+    <a href="{% url 'events:list' %}">Go back to event</a>
+{% else %}
+    {% if user == request.user %}
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+                <h3 style="font-weight: 600;">Create Event</h3>
+            </div>
+        <div class="col-md-6">
+            <div class="stepwizard">
+                <div class="stepwizard-row">
+                    <div class="stepwizard-step">
+                        <div class="btn btn-done btn-circle">
+                            <span><i class="fa fa-check" aria-hidden="true"></i></span>
+                        </div>
+                        <p style="font-weight: 800; color:#25b75d;">Details</p>
+                    </div>
+                    <div class="stepwizard-step">
+                        <div class="btn btn-active btn-circle">
+                            <span>2</span>
+                        </div>
+                        <p style="font-weight: 800; color:#7ca6af;">Locations</p>
+                    </div>
+                    <div class="stepwizard-step">
+                        <div class="btn btn-circle">
+                            <span>3</span>
+                        </div>
+                        <p style="font-weight: 800; color:#f26418;">Collections</p>
+                    </div>
+                    <div class="stepwizard-step">
+                        <div class="btn btn-circle">
+                            <span>4</span>
+                        </div>
+                        <p style="font-weight: 800; color:#f26418;">Invite</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <form action="" method="post">
+        {% csrf_token %}
+            <div class="row justify-content-center">
+
+                <div class="form-group form-group-md col-md-9">
+                    <div class="row">
+                        {{ form.non_field_errors }}
+                        {{ form.location_quota.errors }}
+                        <label class="col-md-3 label col-form-label">
+                            {{ form.location_quota.label_tag }}
+                        </label>
+                        <div class="col-md-9">
+                            {{ form.location_quota }}    
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-md col-md-9">
+                    <div class="row">
+                        {{ form.non_field_errors }}
+                        {{ form.l_title.errors }}
+                        <label class="col-md-3 label col-form-label">
+                            {{ form.l_title.label_tag }}
+                        </label>
+                        <div class="col-md-9">
+                            {{ form.l_title }}    
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-md col-md-9">
+                    <div class="row">
+                        {{ form.non_field_errors }}
+                        {{ form.address.errors }}
+                        <label class="col-md-3 label col-form-label">
+                            {{ form.address.label_tag }}
+                        </label>
+                        <div class="col-md-9">
+                            {{ form.address }}    
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-md col-md-9">
+                    <div class="row">
+                        {{ form.non_field_errors }}
+                        {{ form.l_date.errors }}
+                        <label class="col-md-3 label col-form-label">
+                            {{ form.l_date.label_tag }}
+                        </label>
+                        <div class="col-md-9 input-append date form_datetime">
+                            {{ form.l_date }}    
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-end">
+            <div class="col-md-2">
+            <input type="submit" class="btn-sim btn" value="Next Step" />
+            </div>
+            </div>
+        </form>
+    </div>
+
+
+    
+    {% endif %}
+{% endif %}
+
+<script src="{% static 'js/bootstrap-datetimepicker.min.js' %}"></script>
+     
+    <script type="text/javascript">
+        $("#id_l_date").datetimepicker({
+            format: "yyyy-mm-dd hh:ii:ss",
+            autoclose: true,
+            todayBtn: true,
+            pickerPosition: "bottom-right"
+        });
+    </script>            
+
+{% endblock content %}

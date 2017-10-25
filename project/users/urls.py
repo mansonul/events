@@ -23,4 +23,9 @@ urlpatterns = [
         view=views.UserUpdateView.as_view(),
         name='update'
     ),
+    url(
+        regex=r'^~buy-event/$',
+        view=views.IncreaseQuota.as_view(),
+        name='increase'
+    ),
 ]

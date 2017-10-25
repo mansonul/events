@@ -1,9 +1,10 @@
-{% load staticfiles i18n compress%}<!DOCTYPE html>
+{% load staticfiles i18n compress %}
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>{% block title %}Project{% endblock title %}</title>
+    <title>{% block title %}Events Project{% endblock title %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -12,72 +13,102 @@
     <!--[if lt IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
-
+    {% block head_extra %}{% endblock head_extra %}
     {% block css %}
     <!-- Latest compiled and minified Bootstrap 4 Alpha 4 CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.4/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css" />
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.4/js/fileinput.min.js"></script>
 
     <!-- Your stuff: Third-party CSS libraries go here -->
     {% compress css %}
     <!-- This file stores project-specific CSS -->
     <link href="{% static 'css/project.css' %}" rel="stylesheet">
+    <link href="{% static 'css/normalize.css' %}" rel="stylesheet">
+    <link href="{% static 'css/demo.css' %}" rel="stylesheet">
+    <link href="{% static 'css/set1.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i" rel="stylesheet">
     {% endcompress %}
+    <script src="https://use.fontawesome.com/b52a206494.js"></script>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/r-2.2.0/datatables.min.css"/>
+ 
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.16/r-2.2.0/datatables.min.js"></script>
+
+
+
+
+
+
+
     {% endblock %}
 
   </head>
 
   <body>
-
-    <div class="m-b-1">
-      <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+    {% if messages %}
+      {% for message in messages %}
+        <div id="headerBar" class="headerBar {% if messages %}{% for message in messages %}alert {% if message.tags %}alert-{{ message.tags }}{% endif %}{% endfor %}{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="headerBar"></div>
+    {% endif %}
+    <div class="container">
+    <div class="mb-1">
+    {% block menu %}
+    <nav class="navbar navbar-expand-md navbar-light bg-faded lineUnder">
         <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <a class="navbar-brand" href="{% url 'home' %}">Project</a>
-
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
+            <li class="nav-item {% if request.resolver_match.url_name == 'create' %}active{% endif %}">
+              <a class="nav-link" href="{% url 'events:create' %}">Create New Event <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'list' %}active{% endif %}">
+              <a class="nav-link" href="{% url 'events:list' %}">Events</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'about' %}">About</a>
+              <a class="nav-link" href="{# url 'about' request.user.username #}">Settings</a>
+              <a class="nav-link" href="{# url 'about' #}">Settings</a>
             </li>
+            </ul>
             {% if request.user.is_authenticated %}
-              <li class="nav-item">
+              <span class="nav-item" style="border-left: thin solid #7ca5af;">
                 {# URL provided by django-allauth/account/urls.py #}
-                <a class="nav-link" href="{% url 'users:detail' request.user.username  %}">{% trans "My Profile" %}</a>
-              </li>
-              <li class="nav-item">
-                {# URL provided by django-allauth/account/urls.py #}
-                <a class="nav-link" href="{% url 'account_logout' %}">{% trans "Sign Out" %}</a>
-              </li>
+                <a class="nav-link" href="{% url 'account_logout' %}">{{request.user.username}} - Log Out</a>
+              </span>
             {% else %}
-              <li class="nav-item">
+              <span class="nav-item">
                 {# URL provided by django-allauth/account/urls.py #}
                 <a id="sign-up-link" class="nav-link" href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a>
-              </li>
-              <li class="nav-item">
+              </span>
+              <span class="nav-item">
                 {# URL provided by django-allauth/account/urls.py #}
                 <a id="log-in-link" class="nav-link" href="{% url 'account_login' %}">{% trans "Sign In" %}</a>
-              </li>
+              </span>
             {% endif %}
           </ul>
         </div>
-      </nav>
-
-    </div>
-
-    <div class="container">
-
-      {% if messages %}
-          {% for message in messages %}
-              <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
-          {% endfor %}
-      {% endif %}
+    </nav>
+    {% endblock menu %}
+      </div>
+      {# {% if messages %} #}
+          {# {% for message in messages %} #}
+              <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{# {{ message }} #}</div>
+          {# {% endfor %} #}
+      {# {% endif %} #}
 
       {% block content %}
-        <p>Use this document as a way to quick start any new project.</p>
+        <p><strong>Use this document as a way to quick start any new project.</strong></p>
+        <a href="/">Some colour baby</a>
       {% endblock content %}
 
     </div> <!-- /container -->
@@ -87,11 +118,13 @@
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
+
+
+
     {% block javascript %}
       <!-- Required by Bootstrap v4 Alpha 4 -->
-      <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
 
       <!-- Your stuff: Third-party javascript libraries go here -->
 
@@ -101,6 +134,9 @@
       {% endcompress %}
 
     {% endblock javascript %}
+
+    {% block js %}
+    {% endblock js %}
   </body>
 </html>
  

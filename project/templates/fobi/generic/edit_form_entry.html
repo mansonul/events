@@ -1,0 +1,25 @@
+{% extends fobi_theme.base_edit_template %}
+
+{% load i18n %}
+
+{# {% block page-title %}{% trans "Edit form entry" %}{% endblock page-title %} #}
+
+{# {% block navbar-menu-right-content %} #}
+            {# <li class="active"><a href="{% url 'fobi.dashboard' %}">{% trans "Forms" %}</a></li> #}
+            {# <li><a href="{# url 'fobi.form_wizards_dashboard'">{% trans "Wizards" %}</a></li> #}
+{# {% endblock navbar-menu-right-content %} #}
+
+{% block navbar-menu-content %}
+<li class="active"><a href="{% url 'events:fobi.edit_form_entry' form_entry.pk %}">{% trans "Edit" %}</a></li>
+<li><a href="{% url 'events:fobi.view_form_entry' form_entry.slug %}">{% trans "View" %}</a></li>
+
+{% endblock navbar-menu-content %}
+
+{% block main-content-inner-attrs %}{% endblock main-content-inner-attrs %}
+
+{% block content-wrapper %}
+    {% include fobi_theme.edit_form_entry_ajax_template %}
+{% endblock content-wrapper %}
+
+{% block sidebar-wrapper %}
+{% endblock sidebar-wrapper %}

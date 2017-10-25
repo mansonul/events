@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags staticfiles %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10">
+        <form action="{# url 'events:l-create' #}" method="post" enctype="multipart/form-data">{% csrf_token %}
+
+            {{ form.media }}
+            {{ form.as_p }}
+            
+            <input type="submit" value="Next"/> <a href="{% url 'events:list' %}">back to the list</a>
+        </form>  
+    </div>
+</div>
+{% endblock content %}

@@ -1,15 +1,31 @@
+from django.utils.translation import ugettext_lazy as _
+
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.views.generic import TemplateView
 from django.views import defaults as default_views
+from events.views import (
+    # create_form_entry,
+    edit_form_entry,
+    view_form_entry,
+    form_entry_submitted,
+    delete_form_entry,
+    dashboard,
+    add_form_element_entry,
+    edit_form_element_entry,
+    delete_form_element_entry,
+    add_form_handler_entry,
+    edit_form_handler_entry,
+    delete_form_handler_entry,
+    EventDetailInvitati)
 
 urlpatterns = [
     url(r'^$', TemplateView.as_view(
         template_name='pages/home.html'), name='home'),
-    url(r'^about/$', TemplateView.as_view(
-        template_name='pages/about.html'), name='about'),
+    # url(r'^about/$', TemplateView.as_view(
+    #     template_name='pages/about.html'), name='about'),
 
     # Django Admin, use {% url 'admin:index' %}
     url(settings.ADMIN_URL, admin.site.urls),
@@ -21,6 +37,16 @@ urlpatterns = [
     # Your stuff: custom urls includes go here
     url(r'^events/', include('events.urls', namespace='events')),
 
+    url(r'^invitati/(?P<pk>\d+)/$', EventDetailInvitati.as_view(), name='invitati'),
+
+    # # View URLs
+    # url(r'^fobi/', include('fobi.urls.view')),
+
+    # # # Edit URLs
+    # # Create form entry
+    # url(r'^forms/create/$',
+    #     view=create_form_entry,
+    #     name='fobi.create_form_entry'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

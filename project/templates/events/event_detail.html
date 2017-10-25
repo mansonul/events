@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load easy_maps_tags math fobi_tags %}
+{% block content %}
+
+<div class="row" id="event">
+    <div class="col-md-12">
+            <a href="{% url 'events:update' pk=event.pk %}" type="button" class="btn btn-info">Edit Event</a>
+            <a href="{% url 'events:delete' pk=event.pk %}">Delete {{ event.title }}</a>
+            <hr>
+            <h2>{{ event.title }}</h2>
+            {% if event.image %}
+                <img src="http://www.aplicat.ie:8000{{event.image.url}}" class="img-fluid" style="height: 250px;">
+                <br>
+            {% endif %}
+            <hr>
+            {% if event.description %}
+                {{ event.description|safe }}
+            {% endif %}
+    </div>
+</div>
+{{location_quota.l_title}}<br>
+{{event.location_quota}}
+<div class="row" id="locations">
+
+    {% for location in locations %}
+        <div class="col-md-{{locations.count|div}}" id="location">
+        <hr>
+            <p>{{ location.l_title }}</p>
+            <p>{{ location.location_quota }}</p>
+            <p>{{ location.l_date }}</p>
+            <p>{{ location.address }}</p>
+            <p>{% easy_map location.address %}</p>
+            <hr>
+            <a href="{% url 'events:l-update' pk=location.pk %}" type="button" class="btn btn-info">Edit Location</a> 
+            <a href="{% url 'events:l-delete' pk=location.pk %}">Delete {{ location.l_title }}</a>
+        <hr>
+        </div>
+    {% endfor %}
+</div>
+{# {% if locations.count < location_quota %} #}
+    <a href="{% url 'events:l-create' pk=event.pk %}" type="button" class="btn btn-info">{% if locations.count == 0 %}Add locations{% else %}Add more locations{% endif %}</a>
+{# {% endif %} #}
+
+{% for option in options %}
+    {% if forloop.first %}
+    {% if option %}
+    <div class="row" id="options">
+        <div class="col-md-12" id="option">
+        <hr>
+            {% with option.form as form %}
+                {% include fobi_theme.form_edit_snippet_template_name %}
+            {% endwith %}
+        <hr> 
+            {% for ana in collection %}
+                <a href="{% url 'events:fobi.edit_form_element_entry' form_element_entry_id=ana.pk %}" type="button" class="btn btn-info">Edit collection</a>
+                <a href="{% url 'events:fobi.delete_form_element_entry' form_element_entry_id=ana.pk %}">Delete</a>
+            {% endfor %}
+
+        <hr>
+        </div>
+    </div>
+    {% else %}
+    {% endif %}
+    {% endif %}
+{% endfor %}
+{% if collection.count < collection_quota %}
+    <a href="{% url 'events:fobi.edit_form_entry' form_entry_id=event.pk %}" type="button" class="btn btn-info">Add collection</a>
+{% endif %}
+{% endblock content %}

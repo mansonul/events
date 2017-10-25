@@ -1,1 +1,17 @@
 {% extends "base.html" %}
+
+{% block menu %}
+{% endblock menu %}
+
+{% block content %}
+<h2>{{request.user}}</h2>
+<span class="nav-item">
+                {# URL provided by django-allauth/account/urls.py #}
+                <a id="sign-up-link" class="nav-link" href="{% url 'account_signup' %}">Sign Up</a>
+              </span>
+              <span class="nav-item">
+                {# URL provided by django-allauth/account/urls.py #}
+                <a id="log-in-link" class="nav-link" href="{% url 'account_login' %}">Sign In</a>
+              </span>
+<h1>This is the home page for main domain</h1>
+{% endblock content %}

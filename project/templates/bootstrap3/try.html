@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+                <h3 style="font-weight: 600;">Create Event</h3>
+            </div>
+        <div class="col-md-6">
+            <div class="stepwizard">
+                <div class="stepwizard-row">
+                    <div class="stepwizard-step">
+                        <div class="btn btn-done btn-circle">
+                            <span><i class="fa fa-check" aria-hidden="true"></i></span>
+                        </div>
+                        <p style="font-weight: 800; color:#25b75d;">Details</p>
+                    </div>
+                    <div class="stepwizard-step">
+                        <div class="btn btn-done btn-circle">
+                            <span><i class="fa fa-check" aria-hidden="true"></i></span>
+                        </div>
+                        <p style="font-weight: 800; color:#25b75d;">Locations</p>
+                    </div>
+                    <div class="stepwizard-step">
+                        <div class="btn btn-active btn-circle">
+                            <span>3</span>
+                        </div>
+                        <p style="font-weight: 800; color:#7ca6af;">Options</p>
+                    </div>
+                    <div class="stepwizard-step">
+                        <div class="btn btn-circle">
+                            <span>4</span>
+                        </div>
+                        <p style="font-weight: 800; color:#f26418;">Invite</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+        <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+
+                <div class="form-group form-group-md col-md-12">
+                    <div class="row">
+                        {{ form.non_field_errors }}
+                        {{ form.name.errors }}
+                        <label class="col-md-3 label col-form-label">
+                            {{ form.name.label_tag }}
+                        </label>
+                        <div class="col-md-9">
+                            {{ form.name }}    
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+        <div class="row justify-content-end">
+            <div class="col-md-2">
+                <input type="submit" class="btn-sim btn" value="Next Step" />
+            </div>
+        </div>
+<!--        </form>
+        </div>
+    </div>
+-->
+
+    <div class="row">
+        <ul class="nav pull-right">
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="javascript:;">
+              Select Type <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+            {% for group, plugins in user_form_element_plugins.items %}
+              {% if not forloop.first %}
+              <li class="divider"></li>
+              {% endif %}
+              <li class="dropdown-header">{{ group }}</li>
+              {% for form_element_uid, form_element_name in plugins %}
+<li><a href="{# url 'fobi.add_form_element_entry' form_entry.pk form_element_uid #}">{{ form_element_name }}</a></li>
+              {% endfor %}
+            {% endfor %}
+            </ul>
+          </li>
+        </ul>
+               <!-- <form method="post" action="{{ request.path }}?active_tab=tab-form-elements" novalidate="novalidate" class="{% block form_elements_html_class %}form-horizontal{% endblock %}">
+                  {% csrf_token %}
+                  {% with assembled_form as form %}
+                    {# include fobi_theme.form_edit_snippet_template_name #}
+                  {% endwith %}
+
+                  {{ form_element_entry_formset.management_form }}
+
+                  <div class="{% block form_elements_button_outer_wrapper_html_class %}control-group{% endblock %}">
+                    <div class="{% block form_elements_button_wrapper_html_class %}controls{% endblock %}">
+                      <input type="submit" name="ordering" class="{% block form_elements_button_html_class %}btn btn-primary pull-right{% endblock %}" value="Save ordering"/>
+                    </div>
+                  </div>
+                </form> -->
+
+    </div>
+
+        </form>
+        </div>
+    </div>
+{% endblock content %}

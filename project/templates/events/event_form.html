@@ -1,22 +1,117 @@
 {% extends "base.html" %}
 
-{% block content %}
-{% if object %}
-    <p>Update the event</p>
-        <form action="" method="post" enctype="multipart/form-data" id="event-form">
-        {% csrf_token %}
-            {{ form.media }}
-            {{ form.as_p }}
-            <input type="submit" value="Modify" />
-        </form>
-{% else %}
-    <p>Create an event</p>
-        <form action="" method="post" enctype="multipart/form-data" id="event-form">
-        {% csrf_token %}
-            {{ form.media }}
-            {{ form.as_p }}
-            <input type="submit" value="Save" />
-        </form>
-{% endif %}
+{% load crispy_forms_tags staticfiles %}
 
+{% block content %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <h3 style="font-weight: 600;">Create Event</h3>
+        </div>
+        <div class="col-md-6">
+            <div class="stepwizard">
+                <div class="stepwizard-row">
+                    <div class="stepwizard-step">
+                        <div class="btn btn-active btn-circle">
+                            <span>1</span>
+                        </div>
+                        <p style="font-weight: 800; color:#7ca6af; text-decoration:underline;">Details</p>
+                    </div>
+                    <div class="stepwizard-step">
+                        <div class="btn btn-circle">
+                            <span>2</span>
+                        </div>
+                        <p style="font-weight: 800; color:#f26418;">Locations</p>
+                    </div>
+                    <div class="stepwizard-step">
+                        <div class="btn btn-circle">
+                            <span>3</span>
+                        </div>
+                        <p style="font-weight: 800; color:#f26418;">Collections</p>
+                    </div>
+                    <div class="stepwizard-step">
+                        <div class="btn btn-circle">
+                            <span>4</span>
+                        </div>
+                        <p style="font-weight: 800; color:#f26418;">Invite</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.media }}
+            <div class="row justify-content-center">
+                <div class="form-group form-group-md col-md-9">
+                    <div class="row">
+                        {{ form.non_field_errors }}
+                        {{ form.title.errors }}
+                        <label class="col-md-2 label col-form-label">
+                            {{ form.title.label_tag }}
+                        </label>
+                        <div class="col-md-10">
+                            {{ form.title }}    
+                        </div>
+                            
+                    </div>
+                </div>
+                <div class="form-group form-group-md col-md-9">
+                    <div class="row">
+                        {{ form.non_field_errors }}
+                        {{ form.description.errors }}
+                        <label for="{{form.description.id_for_label}}" class="col-md-2 label col-form-label">
+                            {{ form.description.label_tag }}
+                        </label>
+                            {{ form.description }}
+                    </div>
+                </div>
+                <div class="form-group form-group-md col-md-9">
+                    <div class="row">
+                        <div class="file-loading">
+                        {{ form.non_field_errors }}
+                        {{ form.image.errors }}
+                        {{ form.image }}
+                        </div>
+                    </div>
+                </div>                
+            </div>
+
+            <div class="row justify-content-end">
+            <div class="col-md-2">
+            <input type="submit" class="btn-sim btn" value="Next Step" />
+            </div>
+            </div>
+        </form>
+        
+    </div>
+    <hr>
+<script>
+    $("#id_image").fileinput({
+        mainClass: "file",
+        maxFileCount: 1,
+        maxFileSize: 1024*5,
+        showRemove: false,
+        showPreview: false,
+        initialCaption: 'Upload an Image for your Event',
+        msgPlaceholder: 'Upload an Image for your Event',
+        msgNoFilesSelected: 'Select an image of max 5MB',
+        browseClass: "btn btn-form",
+        browseLabel: "Browse",
+        uploadClass: "btn btn-info",
+        uploadLabel: "Upload",
+        layoutTemplates: {
+            main1: 
+            "<div class=\'input-group {class}\'>\n" +
+            "   <div class=\'input-group-btn\'>\n" +
+            "       {browse}\n" +
+            "       {upload}\n" +
+            "   </div>\n" +
+            "   {caption}\n" +
+            "</div>"
+        }
+    });
+</script>
 {% endblock content %}
