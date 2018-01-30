@@ -30,6 +30,8 @@ __all__ = (
 # **************************** Form handler ***********************************
 # *****************************************************************************
 
+from events.models import EmailApp
+
 
 class DBStoreHandlerPlugin(FormHandlerPlugin):
     """DB store form handler plugin.
@@ -41,7 +43,13 @@ class DBStoreHandlerPlugin(FormHandlerPlugin):
     name = _("DB store")
     allow_multiple = False
 
-    def run(self, form_entry, request, form, form_element_entries=None):
+    def run(
+            self,
+            form_entry,
+            invitee,
+            request,
+            form,
+            form_element_entries=None):
         """Run.
 
         :param fobi.models.FormEntry form_entry: Instance of
@@ -59,6 +67,7 @@ class DBStoreHandlerPlugin(FormHandlerPlugin):
 
         self.save_form_data_entry(
             form_entry,
+            invitee,
             request,
             field_name_to_label_map,
             cleaned_data
@@ -66,6 +75,7 @@ class DBStoreHandlerPlugin(FormHandlerPlugin):
 
     def save_form_data_entry(self,
                              form_entry,
+                             invitee,
                              request,
                              field_name_to_label_map,
                              cleaned_data):
@@ -79,9 +89,14 @@ class DBStoreHandlerPlugin(FormHandlerPlugin):
                     if hasattr(value, 'isoformat') \
                     else value
 
+        # secrets = EmailApp.objects.filter(secret=secret)
+        print('form entry din db: ', field_name_to_label_map)
+        # print('invitee din db: ', invitee)
         saved_form_data_entry = SavedFormDataEntry(
             form_entry=form_entry,
             user=request.user if request.user and request.user.pk else None,
+            # invitee='self.invitee',
+            masa=invitee,
             form_data_headers=json.dumps(field_name_to_label_map),
             saved_data=json.dumps(cleaned_data)
         )

@@ -43,7 +43,7 @@
 
     <div class="row">
         {% if emails.count < 18 %}
-        <form action="" method="post" id="email-form">
+        <form action="" method="post" id="email-form" enctype="multipart/form-data">
         {% csrf_token %}
             <div class="row justify-content-center">
 
@@ -71,6 +71,20 @@
                         </div>
                     </div>
                 </div>
+                <div class="form-group form-group-md col-md-9">
+                    <div class="row">
+                        {{ form.non_field_errors }}
+                        {{ form.file.errors }}
+                        <label class="col-md-3 label col-form-label">
+                            {{ form.file.label_tag }}
+                        </label>
+                        <div class="col-md-9">
+                            {{ form.file }}    
+                        </div>
+                        <input type="hidden" name="content_type_id" value="events.emailapp">
+                          <input type="hidden" name="object_id" value="3">
+                    </div>
+                </div>
             </div>
             <div class="row justify-content-end">
             <div class="col-md-2">
@@ -93,6 +107,25 @@
     {{user.group}}
 
     </div>
+    <hr>
+    <div>
+        
+        <h1>{{label}}</h1>
+            <form action="{{rt}}/datawizard/" method="post" data-ajax="true" data-wq-json="false">
+              {%csrf_token%}
+              <label class="col-md-3 label col-form-label">
+                            {{ form.file.label_tag }}
+                        </label>
+                        <div class="col-md-9">
+                            {{ form.file }}    
+                        </div>  
+              <input type="hidden" name="content_type_id" value="events.emailapp">
+              <input type="hidden" name="object_id" value="3">
+              <button type="submit">Import Data from This File</button>
+            </form>
+
+    </div>
+    <hr>
     <div>
         <form action="{% url 'events:upload_csv' %}" method="POST" enctype="multipart/form-data" class="form-horizontal"> 
             {% csrf_token %}
@@ -155,7 +188,7 @@ var table = $('#myTable').DataTable( {
             },]
 } );
 
-if ( table.rows().count() > 5 ) {
+if ( table.rows().count() > '{{event_email_quota}}' ) {
     location.reload(true)
 } else {
     $('#email-form').on('submit', function(event){
@@ -212,7 +245,7 @@ function create_post() {
     // console.log('data-url '+ url)
     var info = table.page.info();
     infoRec = info.recordsTotal
-    if (infoRec < 5) {
+    if (infoRec < '{{event_email_quota}}') {
         $.ajax({
             type : "POST", // http method
             data : formData, // data sent with the post request

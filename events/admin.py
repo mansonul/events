@@ -27,6 +27,7 @@ class EventAdmin(admin.ModelAdmin):
         ('General',
             {'fields': (
                 'title',
+                'is_public',
                 'image',
                 'description',
                 'user')})

@@ -67,14 +67,16 @@ from .utils import (
 )
 
 
-class EventList(LoginRequiredMixin, ListView):
+# class EventList(LoginRequiredMixin, ListView):
+class EventList(ListView):
     """Organiser can view a list of his events"""
     model = Event
 
     def get_context_data(self, **kwargs):
         context = super(EventList, self).get_context_data(**kwargs)
         context['events'] = Event.objects.filter(user=self.request.user)
-        context['quota'] = self.request.user.event_value
+        # context['events'] = Event.objects.all()
+        # context['quota'] = self.request.user.event_value
         return context
 
 
@@ -86,36 +88,14 @@ class EventDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
         context['locations'] = Location.objects.filter(
-            event__title=self.object.title).filter(
-            event__user=self.request.user)
-        context['collection'] = FormElementEntry.objects.filter(
-            form_entry_id=self.object.pk)
-        context['options'] = assemble_form_class(
-            self.object,
-        )
-        context['collection_quota'] = self.request.user.collection_value
-        return context
-
-
-class EventDetailInvitati(LoginRequiredMixin, DetailView):
-    """Organiser can view a list of his events"""
-    model = Event
-    template_name = 'events/event_detail_invitati.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['locations'] = Location.objects.filter(
-            event__title=self.object.title).filter(
-            event__user=self.request.user)
-        context['anas'] = FormElementEntry.objects.filter(
-            form_entry_id=self.object.pk)
-        print(context['anas'])
-        context['options'] = assemble_form_class(
-            self.object,
-            # form_element_entries=form_element_entries,
-            # request=request
-        )
-        print('options: ', context['options'])
+            event__title=self.object.title)  # .filter(
+            # event__user=self.request.user)
+        # context['collection'] = FormElementEntry.objects.filter(
+        #     form_entry_id=self.object.pk)
+        # context['options'] = assemble_form_class(
+        #     self.object,
+        # )
+        # context['collection_quota'] = self.request.user.collection_value
         return context
 
 
@@ -284,22 +264,46 @@ class EmailCreate(LoginRequiredMixin, AjaxableResponseMixin, CreateView):
         # Pass the Foreign Key to the form
         form.instance.event = get_object_or_404(
             Event, pk=self.kwargs.get('pk'))
-        print(form.instance.event)
-        return super().form_valid(form)
+
+        # Verify the user quota against default quota
+        event_email_quota = Event.objects.filter(
+            pk=self.kwargs['pk']).values_list(
+            'email_quota', flat=True)[0]
+        user_email_count = EmailApp.objects.filter(
+            event__pk=self.kwargs['pk']).filter(
+            event__user=self.request.user).count()
+        email = form.save(commit=False)
+
+        # Save form only if user passes condition
+        if user_email_count < event_email_quota:
+            email.save()
+            return super().form_valid(form)
+
+        # Else redirect him to the Events list
+        else:
+            return HttpResponseRedirect(
+                reverse('events:list'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['emails'] = EmailApp.objects.filter(
             event__pk=self.kwargs.get('pk')).order_by('-pk')
-        print(context['emails'])
+        context['event_email_quota'] = Event.objects.filter(
+            pk=self.kwargs['pk']).values_list(
+            'email_quota', flat=True)[0]
         return context
 
     def get_success_url(self, **kwargs):
         return reverse_lazy('events:list')
 
 
-import os
-import csv
+# class InviteeURL(DetailView):
+#     model = Event
+#     template_name = 'invitee_url.html'
+
+
+import os  # noqa
+import csv  # noqa
 
 
 def upload_csv(request):
@@ -689,7 +693,7 @@ def edit_form_entry(request, form_entry_id, theme=None, template_name=None):
                         reverse('events:fobi.edit_form_entry',
                                 kwargs={'form_entry_id': form_entry_id})
                     )
-            except MultiValueDictKeyError as err:
+            except MultiValueDictKeyError as err:  # noqa
                 messages.error(
                     request,
                     "Errors occurred while trying to change the "
@@ -853,7 +857,39 @@ def dashboard(request, theme=None, template_name=None):
     return render(request, template_name, context)
 
 
-def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
+class EventDetailInvitati(LoginRequiredMixin, DetailView):
+    """Organiser can view a list of his events"""
+    model = EmailApp
+    template_name = 'events/event_detail_invitati.html'
+    slug_field = 'secret'
+    slug_url_kwarg = 'secret'
+
+    def get_context_data(self, **kwargs):
+        da = self.object
+        print(da)
+        context = super().get_context_data(**kwargs)
+        context['event'] = self.object.event
+        context['locations'] = Location.objects.filter(
+            event__title=self.object.event)
+        context['anas'] = FormElementEntry.objects.filter(
+            form_entry_id=self.object.pk)
+        print('Form: ', context['anas'])
+        context['collections'] = assemble_form_class(
+            self.object.event,
+        )
+        context['das'] = EmailApp.objects.values_list('event__title', flat=True)[6]
+        print('das: ', context['das'])
+        # context['collections'] = self.get_form()
+        print('collections: ', context['collections'])
+        return context
+
+
+def view_form_entry(
+        request,
+        # form_entry_slug,
+        secret,
+        theme=None,
+        template_name=None):
     """View created form.
 
     :param django.http.HttpRequest request:
@@ -862,10 +898,13 @@ def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
     :param string template_name:
     :return django.http.HttpResponse:
     """
+    secrets = EmailApp.objects.filter(secret=secret)
+
     try:
-        kwargs = {'slug': form_entry_slug}
-        # if not request.user.is_authenticated():
-        #     kwargs.update({'is_public': True})
+        # kwargs = {'slug': form_entry_slug}
+        kwargs = {'emailapp': secrets}
+        if not request.user.is_authenticated():
+            kwargs.update({'is_public': True})
         form_entry = Event._default_manager.select_related('user') \
                           .get(**kwargs)
     except ObjectDoesNotExist as err:
@@ -885,7 +924,8 @@ def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
         form = form_cls(request.POST, request.FILES)
 
         # Fire pre form validation callbacks
-        fire_form_callbacks(form_entry=form_entry, request=request, form=form,
+        fire_form_callbacks(form_entry=form_entry,
+                            request=request, form=form,
                             stage=CALLBACK_BEFORE_FORM_VALIDATION)
 
         if form.is_valid():
@@ -901,6 +941,7 @@ def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
             # Fire plugin processors
             form = submit_plugin_form_data(
                 form_entry=form_entry,
+                invitee=secrets,
                 request=request,
                 form=form
             )
@@ -913,6 +954,7 @@ def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
             # Run all handlers
             handler_responses, handler_errors = run_form_handlers(
                 form_entry=form_entry,
+                invitee=secret,
                 request=request,
                 form=form,
                 form_element_entries=form_element_entries
@@ -978,7 +1020,150 @@ def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
     }
 
     if not template_name:
-        template_name = theme.view_form_entry_template
+        # template_name = theme.view_form_entry_template
+        template_name = 'events/event_detail_invitati.html'
+
+    return render(request, template_name, context)
+
+
+def view_form_entry_public(
+        request,
+        form_entry_slug,
+        # secret,
+        theme=None,
+        template_name=None):
+    """View created form.
+
+    :param django.http.HttpRequest request:
+    :param string form_entry_slug:
+    :param fobi.base.BaseTheme theme: Theme instance.
+    :param string template_name:
+    :return django.http.HttpResponse:
+    """
+    # secrets = EmailApp.objects.filter(secret=secret)
+
+    try:
+        kwargs = {'slug': form_entry_slug}
+        # kwargs = {'emailapp': secrets}
+        # if not request.user.is_authenticated():
+        #     kwargs.update({'is_public': True})
+        form_entry = Event._default_manager.select_related('user') \
+                          .get(**kwargs)
+    except ObjectDoesNotExist as err:
+        raise Http404("Form entry not found.")
+
+    form_element_entries = form_entry.formelemententry_set.all()[:]
+
+    # This is where the most of the magic happens. Our form is being built
+    # dynamically.
+    form_cls = assemble_form_class(
+        form_entry,
+        form_element_entries=form_element_entries,
+        request=request
+    )
+
+    if request.method == 'POST':
+        form = form_cls(request.POST, request.FILES)
+
+        # Fire pre form validation callbacks
+        fire_form_callbacks(form_entry=form_entry,
+                            request=request, form=form,
+                            stage=CALLBACK_BEFORE_FORM_VALIDATION)
+
+        if form.is_valid():
+            # Fire form valid callbacks, before handling submitted plugin
+            # form data.
+            form = fire_form_callbacks(
+                form_entry=form_entry,
+                request=request,
+                form=form,
+                stage=CALLBACK_FORM_VALID_BEFORE_SUBMIT_PLUGIN_FORM_DATA
+            )
+
+            # Fire plugin processors
+            form = submit_plugin_form_data(
+                form_entry=form_entry,
+                # invitee=secrets,
+                request=request,
+                form=form
+            )
+
+            # Fire form valid callbacks
+            form = fire_form_callbacks(form_entry=form_entry,
+                                       request=request, form=form,
+                                       stage=CALLBACK_FORM_VALID)
+
+            # Run all handlers
+            handler_responses, handler_errors = run_form_handlers(
+                form_entry=form_entry,
+                # invitee=secret,
+                request=request,
+                form=form,
+                form_element_entries=form_element_entries
+            )
+
+            # Warning that not everything went ok.
+            if handler_errors:
+                for handler_error in handler_errors:
+                    messages.warning(
+                        request,
+                        ("Error occurred: {0}.").format(handler_error)
+                    )
+
+            # Fire post handler callbacks
+            fire_form_callbacks(
+                form_entry=form_entry,
+                request=request,
+                form=form,
+                stage=CALLBACK_FORM_VALID_AFTER_FORM_HANDLERS
+            )
+
+            messages.info(
+                request,
+                ("Form {0} was submitted successfully.").format(
+                    form_entry.title
+                )
+            )
+            return redirect(
+                reverse('events:fobi.form_entry_submitted',
+                        args=[form_entry.slug])
+            )
+        else:
+            # Fire post form validation callbacks
+            fire_form_callbacks(form_entry=form_entry, request=request,
+                                form=form, stage=CALLBACK_FORM_INVALID)
+
+    else:
+        # Providing initial form data by feeding entire GET dictionary
+        # to the form, if ``GET_PARAM_INITIAL_DATA`` is present in the
+        # GET.
+        kwargs = {}
+        if GET_PARAM_INITIAL_DATA in request.GET:
+            kwargs = {'initial': request.GET}
+        form = form_cls(**kwargs)
+
+    # In debug mode, try to identify possible problems.
+    if DEBUG:
+        form.as_p()
+    else:
+        try:
+            form.as_p()
+        except Exception as err:
+            logger.error(err)
+
+    theme = get_theme(request=request, as_instance=True)
+    theme.collect_plugin_media(form_element_entries)
+
+    context = {
+        'form': form,
+        'form_entry': form_entry,
+        'fobi_theme': theme,
+        'fobi_form_title': form_entry.title,
+    }
+
+    if not template_name:
+        # template_name = theme.view_form_entry_template
+        template_name = 'events/event_detail_invitati.html'
 
     return render(request, template_name, context)
 
@@ -1089,7 +1274,6 @@ def add_form_element_entry(request,
         return HttpResponseRedirect(
             reverse('events:list'))
 
-
     if save_object:
         # Handling the position
         position = 1
@@ -1129,7 +1313,6 @@ def add_form_element_entry(request,
     # the context processor.
     # if theme:
     #     context.update({'fobi_theme': theme})
-    print('e:', form_elements.count())
 
     if not template_name:
         if not theme:
@@ -1137,8 +1320,6 @@ def add_form_element_entry(request,
         template_name = theme.add_form_element_entry_template
     # else:
     #     template_name = 'k.html'
-
-    print('Aici e in view la add quota: ', form_entry.collection_quota)
 
     return render(request, template_name, context)
     # else:

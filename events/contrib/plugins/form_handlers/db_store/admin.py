@@ -64,12 +64,12 @@ class BaseSavedFormDataEntryAdmin(admin.ModelAdmin):
 class SavedFormDataEntryAdmin(BaseSavedFormDataEntryAdmin):
     """Saved form data entry admin."""
 
-    list_display = ('form_entry', 'user', 'formatted_saved_data', 'created',)
+    list_display = ('form_entry', 'user', 'masa', 'formatted_saved_data', 'created',)
     list_filter = ('form_entry', 'user',)
     readonly_fields = ('created', 'formatted_saved_data')
     fieldsets = (
         (None, {
-            'fields': ('form_entry', 'user',)
+            'fields': ('form_entry', 'user', 'masa')
         }),
         (_("Data"), {
             'fields': ('formatted_saved_data', 'created',)

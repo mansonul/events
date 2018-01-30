@@ -1583,8 +1583,13 @@ class FormElementPlugin(BasePlugin):
             except Exception as err:
                 logger.debug(str(err))
 
-    def submit_plugin_form_data(self, form_entry, request, form,
-                                form_element_entries=None, **kwargs):
+    def submit_plugin_form_data(
+            self,
+            form_entry,
+            invitee,
+            request,
+            form,
+            form_element_entries=None, **kwargs):
         """Submit plugin form data.
 
         Called on form submission (when user actually
@@ -1614,7 +1619,7 @@ class FormHandlerPlugin(BasePlugin):
     storage = FormHandlerPluginDataStorage
     allow_multiple = True
 
-    def _run(self, form_entry, request, form, form_element_entries=None):
+    def _run(self, form_entry, invitee, request, form, form_element_entries=None):
         """Run (internal method).
 
         Safely call the ``run`` method.
@@ -1637,7 +1642,7 @@ class FormHandlerPlugin(BasePlugin):
             form_element_entries = form_entry.formelemententry_set.all()[:]
 
         if FAIL_ON_ERRORS_IN_FORM_HANDLER_PLUGINS:
-            response = self.run(form_entry, request, form,
+            response = self.run(form_entry, invitee, request, form,
                                 form_element_entries)
             if response:
                 return response
@@ -1645,7 +1650,7 @@ class FormHandlerPlugin(BasePlugin):
                 return (True, None)
         else:
             try:
-                response = self.run(form_entry, request, form,
+                response = self.run(form_entry, invitee, request, form,
                                     form_element_entries)
                 if response:
                     return response
@@ -1660,7 +1665,7 @@ class FormHandlerPlugin(BasePlugin):
                 )
                 return (False, err)
 
-    def run(self, form_entry, request, form, form_element_entries=None):
+    def run(self, form_entry, invitee, request, form, form_element_entries=None):
         """Run.
 
         Custom code should be implemented here.
@@ -2652,7 +2657,10 @@ def validate_form_element_plugin_uid(plugin_uid):
     return validate_plugin_uid(form_element_plugin_registry, plugin_uid)
 
 
-def submit_plugin_form_data(form_entry, request, form,
+def submit_plugin_form_data(form_entry,
+                            invitee,
+                            request,
+                            form,
                             form_element_entries=None, **kwargs):
     """Submit plugin form data for all plugins.
 
@@ -2669,6 +2677,7 @@ def submit_plugin_form_data(form_entry, request, form,
         form_element_plugin = form_element_entry.get_plugin(request=request)
         updated_form = form_element_plugin._submit_plugin_form_data(
             form_entry=form_entry,
+            # invitee=form_entry.invitee,
             request=request,
             form=form,
             form_element_entries=form_element_entries,
@@ -2843,7 +2852,11 @@ def get_ordered_form_handler_plugins():
 get_ordered_form_handlers = get_ordered_form_handler_plugins
 
 
-def run_form_handlers(form_entry, request, form, form_element_entries=None):
+def run_form_handlers(form_entry,
+                      invitee,
+                      request,
+                      form,
+                      form_element_entries=None):
     """Run form handlers.
 
     :param fobi.models.FormEntry form_entry:
@@ -2879,6 +2892,7 @@ def run_form_handlers(form_entry, request, form, form_element_entries=None):
             # Run the form handler
             success, response = form_handler_plugin._run(
                 form_entry,
+                invitee,
                 request,
                 form,
                 form_element_entries

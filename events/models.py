@@ -6,7 +6,8 @@ from django.utils import timezone
 from django.contrib.auth.models import Group
 
 from autoslug import AutoSlugField
-from ckeditor.fields import RichTextField
+# from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
 from imagekit.models import ProcessedImageField
 
 from .base import (
@@ -16,32 +17,49 @@ from .base import (
     get_registered_form_handler_plugins
 )
 
-from .exceptions import YouAreNotAllowed
-from django.db.models.signals import pre_save
 from config.key_generator import create_key
 
 
-# Create your models here.
 class Event(models.Model):
     """The place where an organiser can create an event"""
+
+    # Event title.
     title = models.CharField('Event Title', max_length=256)
+
+    # Event slug.
     slug = AutoSlugField(populate_from='title', default='')
-    description = RichTextField(blank=True, null=True)
+
+    # Event description.
+    description = RichTextUploadingField(blank=True, null=True)
+
+    # Event creation date.
     date_created = models.DateTimeField(default=timezone.now,
                                         auto_now=False,
                                         auto_now_add=False)
 
+    # Event is public. Default is False.
+    is_public = models.NullBooleanField(blank=True,
+                                        null=True,
+                                        default=False)
+
+    # Event collections is public. Default is False.
+    # collection_is_public = models.NullBooleanField(blank=True,
+    #                                                null=True,
+    #                                                default=False)
+
+    # Event main image path.
     def path_and_rename(instance, filename):
         extension = filename.split('.')[-1]
         return '{}.{}'.format(timezone.now(), extension)
 
-    # Application side file size check
+    # Application side file size check.
     def file_size(value):
         limit = 5 * 1024 * 1024
         if value.size > limit:
             raise ValidationError(
                 'File too large. Size should not exceed 5 MB.')
 
+    # Event main image.
     image = ProcessedImageField(upload_to=path_and_rename,
                                 validators=[file_size],
                                 format='jpeg',
@@ -49,14 +67,22 @@ class Event(models.Model):
                                 null=True,
                                 blank=True)
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
+    # Event organiser.
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        related_name='events')
 
+    # Event default location quota.
     location_quota = models.IntegerField(
         default=settings.DEFAULT_EVENT_VALUES['location'])
 
+    # Event default collection quota.
     collection_quota = models.IntegerField(
         default=settings.DEFAULT_EVENT_VALUES['collection'])
 
+    # Event default email quota.
     email_quota = models.IntegerField(
         default=settings.DEFAULT_EVENT_VALUES['email'])
 
@@ -72,26 +98,28 @@ class Event(models.Model):
         )
 
 
-# def event_quota(instance, **kwargs):
-#     if instance.__class__.objects.count() < instance.user.event_value:
-#         print(instance.user.event_value)
-#         raise YouAreNotAllowed('You are not allowed to add more!')
-
-
-# pre_save.connect(event_quota, sender=Event)
-
-
 class Location(models.Model):
+    """The place where the organiser can create a location"""
+
+    # The event where the location is attached.
     event = models.ForeignKey(Event)
+
+    # Location title.
     l_title = models.CharField('Location Title',
                                max_length=256,
                                null=True,
                                blank=True)
+
+    # Location slug.
     slug = AutoSlugField(populate_from='l_title', default='')
+
+    # Location date and time.
     l_date = models.DateTimeField('Date and Time',
                                   default=timezone.now,
                                   auto_now=False,
                                   auto_now_add=False)
+
+    # Location address.
     address = models.CharField('Location Address',
                                max_length=255,
                                default='Bucharest')
@@ -101,10 +129,22 @@ class Location(models.Model):
 
 
 class EmailApp(models.Model):
+    """The place where the organiser can add email guests."""
+
+    # The event that the guests belong to.
     event = models.ForeignKey(Event)
+
+    # First and last name of the guest.
     name = models.CharField('Name', max_length=100)
+
+    # Email of the guest.
     email = models.EmailField(max_length=70)
+
+    # The secret key asigned to the guest.
     secret = models.CharField(max_length=15, unique=True, blank=True)
+
+    # Legacy for csv upload.
+    file = models.FileField(upload_to='spreadsheets', null=True, blank=True)
 
     class Meta:
         unique_together = ('event', 'email')
@@ -490,17 +530,6 @@ class FormElementEntry(AbstractPluginEntry):
     def get_registry(self):
         """Get registry."""
         return form_element_plugin_registry
-
-
-# def collection_qouta(instance, **kwargs):
-#     print(instance.form_entry.user.collection_value)
-#     print(instance.__class__.objects.count())
-#     if instance.__class__.objects.count() >= \
-#        instance.form_entry.user.collection_value:
-#         raise YouAreNotAllowed('You are not allowed to add more!')
-
-
-# pre_save.connect(collection_qouta, sender=FormElementEntry)
 
 
 class FormHandlerEntry(AbstractPluginEntry):

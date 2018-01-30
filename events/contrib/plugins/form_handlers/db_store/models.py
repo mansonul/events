@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from .....helpers import two_dicts_to_string
+from events.models import EmailApp
 
 __title__ = 'fobi.contrib.plugins.form_handlers.db_store.models'
 __author__ = 'Artur Barseghyan <artur.barseghyan@gmail.com>'
@@ -32,6 +33,7 @@ class AbstractSavedFormDataEntry(models.Model):
 
     user = models.ForeignKey(AUTH_USER_MODEL, verbose_name=_("User"),
                              null=True, blank=True)
+    masa = models.CharField(max_length=15, null=True, blank=True)
     form_data_headers = models.TextField(_("Form data headers"), null=True,
                                          blank=True)
     saved_data = models.TextField(_("Plugin data"), null=True, blank=True)
@@ -72,6 +74,9 @@ class SavedFormDataEntry(AbstractSavedFormDataEntry):
 
     form_entry = models.ForeignKey('events.Event', verbose_name=_("Form"),
                                    null=True, blank=True)
+    invitee = models.ForeignKey('events.EmailApp', verbose_name=_("Invitee"),
+                                null=True, blank=True)
+    # invitees = models.CharField(max_length=16, unique=True, blank=True)
 
     class Meta(object):
         """Meta class."""

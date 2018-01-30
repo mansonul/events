@@ -19,7 +19,8 @@ from events.views import (
     add_form_handler_entry,
     edit_form_handler_entry,
     delete_form_handler_entry,
-    EventDetailInvitati)
+    # EventDetailInvitati,
+)
 
 urlpatterns = [
     url(r'^$', TemplateView.as_view(
@@ -29,6 +30,12 @@ urlpatterns = [
 
     # Django Admin, use {% url 'admin:index' %}
     url(settings.ADMIN_URL, admin.site.urls),
+    url(r'^api-auth/', include(
+        'rest_framework.urls',
+        namespace='rest_framework')),
+
+    url(r'^rest-auth/', include('rest_auth.urls')),
+    url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
 
     # User management
     url(r'^users/', include('project.users.urls', namespace='users')),
@@ -37,7 +44,13 @@ urlpatterns = [
     # Your stuff: custom urls includes go here
     url(r'^events/', include('events.urls', namespace='events')),
 
-    url(r'^invitati/(?P<pk>\d+)/$', EventDetailInvitati.as_view(), name='invitati'),
+    # API
+    url(r'^api/', include('events.api.urls', namespace='api')),
+
+    # url(r'^invitati/(?P<secret>[-\w\d]+)/$',
+    #     EventDetailInvitati.as_view(), name='invitati'),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
+
 
     # # View URLs
     # url(r'^fobi/', include('fobi.urls.view')),

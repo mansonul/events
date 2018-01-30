@@ -1,4 +1,6 @@
 from django.conf.urls import include, url
+from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework_jwt.views import obtain_jwt_token
 
 from . import views
 
@@ -9,10 +11,11 @@ urlpatterns = [
         name='list'
     ),
 
+    url(r'^api-token-auth/', obtain_jwt_token),
     # url(
-    #     regex=r'^suzi/(?P<pk>\d+)/$',
-    #     view=views.CollectionCreateView.as_view(),
-    #     name='suzi'
+    #     regex=r'^(?P<event_slug>[\w_\-]+)/(?P<invitee_uid>\d+)/$',
+    #     view=views.InviteeURL.as_view(),
+    #     name='invitee-url'
     # ),
 
     url(
@@ -20,6 +23,7 @@ urlpatterns = [
         view=views.EmailCreate.as_view(),
         name='email-create'
     ),
+
     url(r'^emails/$', views.upload_csv, name='upload_csv'),
     # url(
     #     regex=r'^emails/export/$',
@@ -93,10 +97,19 @@ urlpatterns = [
     #     views.edit_form_entry,
     #     name='fobi.edit_form_entry'),
 
-    # View form entry
-    url(r'^view/(?P<form_entry_slug>[\w_\-]+)/$',
+    # url(r'^snippets/$', api_view.UserEventList.as_view()),
+    # url(r'^snippets/(?P<slug>[\w_\-]+)/$', api_view.SnippetDetail.as_view()),
+
+
+    # View form entry for guests
+    url(r'^(?P<secret>[\w_\-]+)/$',
         views.view_form_entry,
         name='fobi.view_form_entry'),
+
+    # View form entry for public
+    url(r'^a/(?P<form_entry_slug>[\w_\-]+)/$',
+        views.view_form_entry_public,
+        name='fobi.view_form_entry_public'),
 
     # Forms dashboard
     url(r'^collections/$', view=views.dashboard, name='fobi.dashboard'),
@@ -155,3 +168,5 @@ urlpatterns = [
     url(r'^collections/plugins/form-handlers/db-store/',
         include('events.contrib.plugins.form_handlers.db_store.urls')),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

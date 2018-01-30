@@ -51,13 +51,20 @@ THIRD_PARTY_APPS = [
     'allauth.account',  # registration
     'allauth.socialaccount',  # registration
     'ckeditor',  # ckeditor
+    'ckeditor_uploader',
     'imagekit',  # Image
     'autoslug',  # Slug creator
     'easy_maps',  # Maps
-    'leaflet',  # Another Map
+    # 'leaflet',  # Another Map
     'extra_views',  # views
     # 'django_hosts',  # For subdomains
     'import_export',  # For import and export
+    'rest_framework',  # REST Framework
+    'rest_framework.authtoken',
+    'corsheaders',  # CORS for REST
+    'rest_auth',  # For DRF Auth
+    'rest_auth.registration',
+    # 'data_wizard',  # CSV Impor
 ]
 
 # Apps specific for this project go here.
@@ -82,8 +89,9 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # ------------------------------------------------------------------------------
 MIDDLEWARE = [
     # Hosts
-    'django_hosts.middleware.HostsRequestMiddleware',
+    # 'django_hosts.middleware.HostsRequestMiddleware',
     # End Hosts
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -93,14 +101,47 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     # Hosts
-    'django_hosts.middleware.HostsResponseMiddleware',
+    # 'django_hosts.middleware.HostsResponseMiddleware',
     # End Hosts
 ]
+
+# REST_USE_JWT = True
+
+# CORS
+# CORS_ORIGIN_WHITELIST = (
+#     'localhost:4200',
+#     'localhost:8000',
+# )
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOW_METHODS = (
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+)
+
 
 # MIGRATIONS CONFIGURATION
 # ------------------------------------------------------------------------------
 MIGRATION_MODULES = {
     'sites': 'project.contrib.sites.migrations'
+}
+
+# REST
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
 }
 
 # DEBUG
@@ -302,12 +343,23 @@ LOGIN_URL = 'account_login'
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
 ########## CELERY
-INSTALLED_APPS += ['project.taskapp.celery.CeleryConfig']
-CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='django://')
-if CELERY_BROKER_URL == 'django://':
-    CELERY_RESULT_BACKEND = 'redis://'
-else:
-    CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+# INSTALLED_APPS += ['project.taskapp.celery.CeleryConfig']
+# CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='django://')
+# if CELERY_BROKER_URL == 'django://':
+#     CELERY_RESULT_BACKEND = 'redis://'
+# else:
+#     # CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+#     CELERY_RESULT_BACKEND = CELERY_BROKER_URL = 'redis://localhost:6379/1'
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL = 'redis://localhost:6379/1'
+
+# CELERY_BROKER_URL = 'redis://localhost:6379'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Makassar'
+CELERY_BEAT_SCHEDULE = {}
+
 ########## END CELERY
 # django-compressor
 # ------------------------------------------------------------------------------
@@ -319,16 +371,31 @@ ADMIN_URL = r'^admin/'
 
 # Your common stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
+CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_CONFIGS = {
     'default': {
+        "removePlugins": "stylesheetparser",
         'skin': 'dragos',
-        'toolbar': 'Custom',
-        'toolbar_Custom': [
-            ['Bold', 'Italic', 'Underline'],
-            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
-            ['Link', 'Unlink'],
-            ['RemoveFormat']
-        ],
+        # 'toolbar': 'Custom',
+        # 'toolbar_Custom': [
+        #     ['Bold', 'Italic', 'Underline'],
+        #     ['NumberedList',
+        #      'BulletedList',
+        #      '-',
+        #      'Outdent',
+        #      'Indent',
+        #      '-',
+        #      'JustifyLeft',
+        #      'JustifyCenter',
+        #      'JustifyRight',
+        #      'JustifyBlock'],
+        #     ['Format', 'Font', 'FontSize', 'ImageButton'],
+        #     ['Link', 'Unlink'],
+        #     ['RemoveFormat']
+        # ],
+        'toolbar': 'full',
+        # 'extraPlugins': ','.join([
+        #     'uploadimage']),
         'width': '100%',
     }
 }

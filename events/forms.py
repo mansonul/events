@@ -80,6 +80,7 @@ class EmailForm(ModelForm):
         fields = (
             'name',
             'email',
+            'file',
         )
         widgets = {
             'name': forms.TextInput(
